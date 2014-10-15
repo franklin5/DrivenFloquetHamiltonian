@@ -1,0 +1,14 @@
+hz	0.9
+muInf	0.12
+Tperiod	26.24
+lambda	1.2
+Length	200.0
+kmax	5.0
+
+PMAX	21
+NMAX	1
+NKX	51
+
+chernsolver	curvature
+
+
