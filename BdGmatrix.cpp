@@ -7,59 +7,58 @@
 #include "floquet.h"
 void cFloquet::update(int nk){
   if (nk == -1) {
-	  _bdg_H.setZero(); // This is done only once.
-	  int p, q;
-	  // The off-diagonal coupling introduced from time-dependent order parameter should be computed only here.
-	  complex<double> Gamma2;
-	  double dt = 0.0005;
-	  double t = 0.0;
-	  VectorXd Delta_t(100000);
-	  Delta_t.setZero();
-	  int count = 0;
-	  while (t<_T){
-	    Delta_t(count) = 0.1-0.1*cos(2*M_PI*t/_T);
-//		test_output << reD << '\t' << imD << endl;
-	  	count++;
-		t+=dt;
-	  }
-	  for (int i = 0; i < _pblock; ++i) {
-	  		p = i-_PMAX;
-	  		for (int j = 0; j < _pblock; ++j) {
-	  			q = j-_PMAX;
-	  			Gamma2 = complex<double> (0.0,0.0);
-	  			t = 0.0;
-	  			for (int ig = 0; ig < count; ++ig) {
-					Gamma2 +=  abs(Delta_t(ig)) *
-							complex<double> (cos(2*M_PI*(q-p)*t/_T),-sin(2*M_PI*(q-p)*t/_T));
-					t += dt;
-				}
-	  			Gamma2 = Gamma2/_T*dt;
-//	  			cout << Gamma2 << endl;
-	  			_bdg_H(i+2*_pblock,j+_pblock) = Gamma2;
-	  			_bdg_H(i+3*_pblock,j) = -Gamma2;
-	  		}
-	  }
+    _bdg_H.setZero(); // This is done only once.
   } else {
-	  int nkx = nk % _NKX;     // --> the modulo (because nk = nkx+ nky * NKX )
-	  int nky = int (nk/_NKX); // --> the floor
-	  double kx = _gauss_k[nkx], ky = _gauss_k[nky];
-	  update_kxky(kx,ky);
-
-
+    if (string(topo) == "bulk") {
+      int nkx = nk % _NKX;     // --> the modulo (because nk = nkx+ nky * NKX )
+      int nky = int (nk/_NKX); // --> the floor
+      update(_gauss_k[nkx], _gauss_k[nky]);
+    } else if (string(topo) == "edge"){
+      update(_gauss_k[nk]);
+    }
   }
 }
 
-void cFloquet::update_kxky(double kx, double ky){
-	double xi = kx*kx + ky*ky - _mu;
-	int p;
-	for (int i = 0; i < _pblock; ++i) {
-		p = i-_PMAX;
-		// only lower left part of the matrix is needed for storage.
-		_bdg_H(i,i) 	   = complex<double>(xi+_h+2*M_PI*p/_T,0.0);
-		_bdg_H(i+_pblock,i)   = complex<double>(_v*kx,_v*ky);
-		_bdg_H(i+_pblock,i+_pblock)= complex<double>(xi-_h+2*M_PI*p/_T,0.0);
-		_bdg_H(i+2*_pblock,i+2*_pblock) = complex<double>(-(xi+_h+2*M_PI*p/_T),0.0);
-		_bdg_H(i+3*_pblock,i+2*_pblock) = complex<double>(_v*kx,-_v*ky);
-		_bdg_H(i+3*_pblock,i+3*_pblock) = complex<double>(-(xi-_h+2*M_PI*p/_T),0.0);
+void cFloquet::update(double kx, double ky){
+  // Bulk property: Chern number
+  // Wavefunction is expanded in frequency domain for time-dependent problem; p = 0 for time-independent problem.
+  if (_ibdg == 4) {
+    double xi = kx*kx + ky*ky - _mu;
+    int p,q,m,n;
+    int ip, iq, im, in;
+    for (int ip1 = 0; ip1 < _pblock; ++ip1) {
+      p  = ip1-_PMAX;
+      ip = ip1*_ibdg*_NMAX;
+      // only lower left part of the matrix is referenced for a self-adjoint matrix in Eigen's notation.
+      for (int im1 = 0; im1 < _NMAX; ++im1) {
+	m  = im1 + 1;
+	im = im1*_ibdg;
+	_bdg_H(ip+im,  ip+im)	= complex<double>(xi+_h+pow(m*M_PI/_L,2.0)+2*M_PI*p/_T,0.0);
+	_bdg_H(ip+im+1,ip+im)   = complex<double>(_v*kx,_v*ky);
+	_bdg_H(ip+im+1,ip+im+1)	= complex<double>(xi-_h+pow(m*M_PI/_L,2.0)+2*M_PI*p/_T,0.0);
+	_bdg_H(ip+im+2,ip+im+2) = complex<double>(-(xi+_h+pow(m*M_PI/_L,2.0)+2*M_PI*p/_T),0.0);
+	_bdg_H(ip+im+3,ip+im+2) = complex<double>(_v*kx,-_v*ky);
+	_bdg_H(ip+im+3,ip+im+3) = complex<double>(-(xi-_h+pow(m*M_PI/_L,2.0)+2*M_PI*p/_T),0.0);
+      }
+      for (int iq1 = 0; iq1 < ip1; ++iq1){
+	q = iq1-_PMAX;
+	iq = iq1*_ibdg*_NMAX;
+	_bdg_H(ip+im)
+      }
+    }
+    
+  } else if (_ibdg == 2){
+    
+  }
+}
+ 
+void cFloquet::update(double kx){
+	// Edge property: spectrum under hard wall boundary condition.
+	// Wavefunction is expanded in both y-direction and frequency domain.
+	if (_ibdg == 4) {
+
+	} else if (_ibdg == 2){
+
 	}
+
 }

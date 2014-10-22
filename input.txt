@@ -1,14 +1,22 @@
 hz	0.9
 muInf	0.12
 Tperiod	26.24
+Delta0	0.1
 lambda	1.2
 Length	200.0
 kmax	5.0
 
+ibdg	4
 PMAX	21
 NMAX	1
 NKX	51
 
 chernsolver	curvature
+topo		bulk
 
-
+mu              1.0
+J               1.5
+b               1.5
+a               4.0
+Delta0          1.0
+omega           14.2857

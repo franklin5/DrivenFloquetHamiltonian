@@ -17,19 +17,17 @@ private:
 	double  *localEig, *TotalEig;
 	int offset;
 	// system parameter related:
-	double  _h, _mu, _T, _v, _L, _kmax;
-	int _PMAX, _NMAX, _SMAX, _pblock,_pblock4,  _NKX, _NKX2;
-	char* chernsolver;
+	double  _h, _mu, _T, _Delta0, _v, _L, _kmax;
+	double _J, _b, _a, _omega;
+	int _ibdg, _PMAX, _NMAX, _SMAX, _pblock,_pblock4,  _NKX, _NKX2;
+	char* chernsolver, *topo;
 	double* _gauss_k, *_gauss_w_k;
 	VectorXd  _bdg_E;
 	MatrixXcd _bdg_V, _bdg_H;
 
 public:
-	cFloquet(const int rank, const int size, const int root){_rank = rank;_size=size;_root=root;};
-	~cFloquet(){
-		delete []_gauss_k;
-		delete []_gauss_w_k;
-		delete []chernsolver;}
+	cFloquet(const int rank, const int size, const int root){_rank = rank;_size=size;_root=root;}
+	~cFloquet(){}
 
 	void construction();
 	void destruction();
@@ -39,8 +37,10 @@ public:
 	void aggregation();
 	void compute_chern();
 
+	// --> overload member function update
 	void update(int);
-	void update_kxky(double, double);
+	void update(double, double);
+	void update(double);
 
 };
 #endif /* FLOQUET_H_ */

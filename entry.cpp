@@ -9,6 +9,7 @@
 #include "floquet.h"
 #define root 0
 int main(int argc, char** argv){
+//	cout << argc << ' ' << argv[0] << argv[1] << endl;
 	Init(argc,argv);
 	int rank, size;
 	rank = COMM_WORLD.Get_rank();
